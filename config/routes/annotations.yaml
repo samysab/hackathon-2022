@@ -1,13 +1,3 @@
-controllers_front:
-    resource: ../../src/Controller/Front
-    type: annotation
-
-
-controllers_back:
-    resource: ../../src/Controller/Back
-    type: annotation
-    prefix: /admin
-    name_prefix: admin_
 
 controllers:
     resource: ../../src/Controller
