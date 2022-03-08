@@ -4,16 +4,21 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegisterType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+
 
 class SecurityController extends AbstractController
 {
     #[Route('/register', name: 'app_register', methods: ['GET','POST'])]
-    public function new(Request $request): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = new User();
         $form = $this->createForm(RegisterType::class, $user);
@@ -21,19 +26,25 @@ class SecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setRoles(["ROLE_USER"]);
-            $entityManager = $this->getDoctrine()->getManager();
+            $user->setPassword($passwordHasher->hashPassword($user, $user->getPassword()));
             $entityManager->persist($user);
             $entityManager->flush();
 
-            return $this->redirectToRoute('train_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_front_home', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->renderForm('security/register.html.twig', [
-            'train' => $user,
+            'user' => $user,
             'form' => $form,
         ]);
     }
 
+    #[Route(path: '/generateLogin', name: 'app_generateLogin')]
+    public function generateLogin(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher){
+
+        $user = new User();
+
+    }
 
 
     #[Route(path: '/login', name: 'app_login')]
