@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegisterType;
+use App\Form\GenerateLoginType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,6 +14,9 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use App\Service\apiMailerService;
 
 
 class SecurityController extends AbstractController
@@ -39,11 +43,47 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/generateLogin', name: 'app_generateLogin')]
-    public function generateLogin(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher){
+    function generate_string($input, $strength = 16) {
+        $input_length = strlen($input);
+        $random_string = '';
+        for($i = 0; $i < $strength; $i++) {
+            $random_character = $input[mt_rand(0, $input_length - 1)];
+            $random_string .= $random_character;
+        }
 
+        return $random_string;
+    }
+
+    #[Route(path: '/admin/finish-rapport', name: 'app_generateLogin', methods: ['GET','POST'])]
+    public function generateLogin(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer){
         $user = new User();
 
+        $form = $this->createForm(GenerateLoginType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@&-_';
+            $password = $this->generate_string($permitted_chars, 10);
+            $user->setPassword($passwordHasher->hashPassword($user,$password ));
+            $user->setRoles(["ROLE_USER"]);
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $email = (new Email())
+                ->from('wbhackathon2022@example.com')
+                ->to($user->getEmail())
+                ->subject("[WB] Votre rapport d'étude est prêt !")
+                ->text('Sending emails is fun again!')
+                ->html("<h2>Votre rapport d'étude est enfin prêt !</h2><p>Nous vous avons créer un login et un mot de passe afin que vous puissiez acceder à votre espace client</p><p><u>Information de connexion :</u></p><p>Login : ".$user->getLogin()."</p><p>Email : ".$user->getEmail()."</p><p>Mot de passe : ".$password. "</p>");
+
+            $mailer->send($email);
+            return $this->redirectToRoute('app_back_home', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('security/generateLogin.html.twig', [
+            'user' => $user,
+            'form' => $form,
+        ]);
     }
 
 

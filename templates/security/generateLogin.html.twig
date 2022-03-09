@@ -1,0 +1,10 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}[WB] Invitation{% endblock %}
+
+{% block body %}
+    {{ form_start(form) }}
+        {{ form_rest(form) }}
+    <button type="submit">S'enregistrer</button>
+    {{ form_end(form) }}
+{% endblock %}
