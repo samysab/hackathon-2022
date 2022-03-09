@@ -1,0 +1,285 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello RapportController!{% endblock %}
+
+{% block body %}
+    <h2>home du Front</h2>
+    <input type="file" id="fileUpload" />
+    <input type="button" id="upload" value="Upload" />
+    <hr />
+    <div class="d-none" id="step1">
+        <h2>Personnalisation du rapport</h2>
+        <div class="container">
+            <div id="graph_1">
+                <div class="row">
+                    <div class="col mb-5">
+                        <div class="d-flex justify-content-between">
+                            <div class="input-group mb-3 mr-2">
+                                <label class="input-group-text" for="axeX_1">Axe X</label>
+                                <select class="form-select" id="axeX_1" onchange="hideEntete('axeX_1')">
+                                    <option selected>Choose...</option>
+                                    <option value="product_code">product_code</option>
+                                    <option value="user_id">user_id</option>
+                                    <option value="zone_code">zone_code</option>
+                                    <option value="score_skinbiosense">score_skinbiosense</option>
+                                    <option value="session_id">session_id</option>
+                                    <option value="mesure">mesure</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="axeY_1">Axe Y</label>
+                            <select class="form-select" id="axeY_1">
+                                <option selected>Choose...</option>
+                                <option value="product_code">product_code</option>
+                                <option value="user_id">user_id</option>
+                                <option value="zone_code">zone_code</option>
+                                <option value="score_skinbiosense">score_skinbiosense</option>
+                                <option value="session_id">session_id</option>
+                                <option value="mesure">mesure</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="typeGraph_1">Type de graphique</label>
+                            <select class="form-select" id="typeGraph_1">
+                                <option selected>Choose...</option>
+                                <option value="bar">bar</option>
+                                <option value="bubble">Bulle</option>
+                                <option value="doughnut">Doughnut</option>
+                                <option value="line">ligne</option>
+                                <option value="polarArea">Polar</option>
+                                <option value="radar">Radar</option>
+                                <option value="scatter">Scatter</option>
+                                <!-- TODO !-->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-floating">
+                            <textarea class="form-control" placeholder="Saisir vos notes d'observation" id="observation_1" style="height: 100px"></textarea>
+                            <label for="floatingTextarea2">Description du graphique</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" value="1" id="idxGraph">
+        <button type="button" class="btn btn-outline-success ms-2" onclick="addNewgraph()">Ajouter un nouveau graph</button>
+    </div>
+    <button type="button" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/xlsx.full.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/jszip.js"></script>
+    <script type="text/javascript">
+        $("body").on("click", "#upload", function () {
+            //Reference the FileUpload element.
+            var fileUpload = $("#fileUpload")[0];
+
+            //Validate whether File is valid Excel file.
+            var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
+            if (regex.test(fileUpload.value.toLowerCase())) {
+                if (typeof (FileReader) != "undefined") {
+                    var reader = new FileReader();
+
+                    //For Browsers other than IE.
+                    if (reader.readAsBinaryString) {
+                        reader.onload = function (e) {
+                            ProcessExcel(e.target.result);
+                        };
+                        reader.readAsBinaryString(fileUpload.files[0]);
+                    } else {
+                        //For IE Browser.
+                        reader.onload = function (e) {
+                            var data = "";
+                            var bytes = new Uint8Array(e.target.result);
+                            for (var i = 0; i < bytes.byteLength; i++) {
+                                data += String.fromCharCode(bytes[i]);
+                            }
+                            ProcessExcel(data);
+                        };
+                        reader.readAsArrayBuffer(fileUpload.files[0]);
+                    }
+                } else {
+                    alert("This browser does not support HTML5.");
+                }
+            } else {
+                alert("Please upload a valid Excel file.");
+            }
+        });
+        function ProcessExcel(data) {
+            //Read the Excel File data.
+            var workbook = XLSX.read(data, {
+                type: 'binary'
+            });
+
+            //Fetch the name of First Sheet.
+            var firstSheet = workbook.SheetNames[1];
+
+            //Read all rows from First Sheet into an JSON array.
+            var excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet]);
+
+            //Create a HTML Table element.
+            var table = $("<table />");
+            table[0].border = "1";
+
+            //Add the header row.
+            var row = $(table[0].insertRow(-1));
+
+            //Add the header cells.
+            var headerCell = $("<th />");
+            headerCell.html("product_code");
+            row.append(headerCell);
+
+            var headerCell = $("<th />");
+            headerCell.html("user_id");
+            row.append(headerCell);
+
+            var headerCell = $("<th />");
+            headerCell.html("zone_code");
+            row.append(headerCell);
+
+            var headerCell = $("<th />");
+            headerCell.html("score_skinbiosense");
+            row.append(headerCell);
+
+            var headerCell = $("<th />");
+            headerCell.html("session_id");
+            row.append(headerCell);
+
+            var headerCell = $("<th />");
+            headerCell.html("mesure");
+            row.append(headerCell);
+
+
+            let datajson = [];
+
+            //Add the data rows from Excel file.
+            for (var i = 0; i < excelRows.length; i++) {
+                //Add the data row.
+                let json = JSON.stringify({
+                    "id": i,
+                    "product_code": excelRows[i].product_code,
+                    "user_id": excelRows[i].user_id,
+                    "zone_code": excelRows[i].zone_code,
+                    "score_skinbiosense": excelRows[i].score_skinbiosense,
+                    "session_id": excelRows[i].session_id,
+                    "mesure": excelRows[i].mesure
+                });
+
+                datajson.push(json);
+                var row = $(table[0].insertRow(-1));
+
+                //Add the data cells.
+                var cell = $("<td />");
+                cell.html(excelRows[i].product_code);
+                row.append(cell);
+
+                cell = $("<td />");
+                cell.html(excelRows[i].user_id);
+                row.append(cell);
+
+                cell = $("<td />");
+                cell.html(excelRows[i].zone_code);
+                row.append(cell);
+
+                cell = $("<td />");
+                cell.html(excelRows[i].score_skinbiosense);
+                row.append(cell);
+
+                cell = $("<td />");
+                cell.html(excelRows[i].session_id);
+                row.append(cell);
+
+                cell = $("<td />");
+                cell.html(excelRows[i].mesure);
+                row.append(cell);
+            }
+
+            $('#step1').removeClass("d-none")
+            $("#btnCreerRapport").removeClass("d-none")
+        };
+       function hideEntete(id) {
+           let idxtmp = id.split("_")
+           let idx = idxtmp[1]
+            $("#axeY_"+idx+" option").each( function () {
+                if ($("#axeX_"+idx).val() === $(this).val()){
+                    $(this).addClass('d-none')
+                }else{
+                    $(this).removeClass('d-none')
+                }
+            })
+        }
+
+        function addNewgraph(){
+            let idx = parseInt($('#idxGraph').val())
+            idx += 1
+            $('#idxGraph').val(idx)
+            let html = '<div id="graph_'+idx+'">' +
+                '               <div class="row mb-4">\n' +
+                '                    <div class="col">\n' +
+                '                        <div class="d-flex justify-content-between">\n' +
+                '                            <div class="input-group mb-3 mr-2">\n' +
+                '                                <label class="input-group-text" for="axeX_'+idx+'">Axe X</label>\n' +
+                '                                <select class="form-select" id="axeX_'+idx+'" onchange="hideEntete(\'axeX_'+idx+'\')">\n' +
+                '                                    <option selected>Choose...</option>\n' +
+                '                                    <option value="product_code">product_code</option>\n' +
+                '                                    <option value="user_id">user_id</option>\n' +
+                '                                    <option value="zone_code">zone_code</option>\n' +
+                '                                    <option value="score_skinbiosense">score_skinbiosense</option>\n' +
+                '                                    <option value="session_id">session_id</option>\n' +
+                '                                    <option value="mesure">mesure</option>\n' +
+                '                                </select>\n' +
+                '                            </div>\n' +
+                '                        </div>\n' +
+                '                    </div>\n' +
+                '                    <div class="col">\n' +
+                '                        <div class="input-group mb-3">\n' +
+                '                            <label class="input-group-text" for="axeY_'+idx+'">Axe Y</label>\n' +
+                '                            <select class="form-select" id="axeY_'+idx+'">\n' +
+                '                                <option selected>Choose...</option>\n' +
+                '                                <option value="product_code">product_code</option>\n' +
+                '                                <option value="user_id">user_id</option>\n' +
+                '                                <option value="zone_code">zone_code</option>\n' +
+                '                                <option value="score_skinbiosense">score_skinbiosense</option>\n' +
+                '                                <option value="session_id">session_id</option>\n' +
+                '                                <option value="mesure">mesure</option>\n' +
+                '                            </select>\n' +
+                '                        </div>\n' +
+                '                    </div>\n' +
+                '                    <div class="col">\n' +
+                '                        <div class="input-group mb-3">\n' +
+                '                            <label class="input-group-text" for="typeGraph_'+idx+'">Type de graphique</label>\n' +
+                '                            <select class="form-select" id="typeGraph_'+idx+'">\n' +
+                '                                <option selected>Choose...</option>\n' +
+                '                                <option value="bar">bar</option>\n' +
+                '                                <option value="bubble">Bulle</option>\n' +
+                '                                <option value="doughnut">Doughnut</option>\n' +
+                '                                <option value="line">ligne</option>\n' +
+                '                                <option value="polarArea">Polar</option>\n' +
+                '                                <option value="radar">Radar</option>\n' +
+                '                                <option value="scatter">Scatter</option>' +
+                '                            </select>\n' +
+                '                        </div>\n' +
+                '                    </div>\n' +
+                '                   <div class="col">\n' +
+                '                        <div class="form-floating">\n' +
+                '                            <textarea class="form-control" placeholder="Saisir vos notes d\'observation" id="observation_'+idx+' style="height: 100px"></textarea>\n' +
+                '                            <label for="floatingTextarea2">Description du graphique</label>\n' +
+                '                        </div>\n' +
+                '                    </div></n>' +
+                '                </div>'
+
+            $(".container").append(html)
+        }
+
+    </script>
+
+{% endblock %}
