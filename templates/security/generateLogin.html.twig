@@ -3,8 +3,15 @@
 {% block title %}[WB] Invitation{% endblock %}
 
 {% block body %}
-    {{ form_start(form) }}
-        {{ form_rest(form) }}
-    <button type="submit">S'enregistrer</button>
-    {{ form_end(form) }}
+<div class="container">
+    <h2>Création d'une invitation </h2>
+    <div class="row">
+        <div class="d-flex justify-content-center">
+            {{ form_start(form) }}
+            {{ form_rest(form) }}
+            <button type="submit" class="mt-4 btn btn-outline-success">Créer le compte</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
 {% endblock %}

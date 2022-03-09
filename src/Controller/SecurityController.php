@@ -72,9 +72,9 @@ class SecurityController extends AbstractController
             $email = (new Email())
                 ->from('wbhackathon2022@example.com')
                 ->to($user->getEmail())
-                ->subject("[WB] Votre rapport d'étude est prêt !")
+                ->subject("[WB] Votre rapportOld d'étude est prêt !")
                 ->text('Sending emails is fun again!')
-                ->html("<h2>Votre rapport d'étude est enfin prêt !</h2><p>Nous vous avons créer un login et un mot de passe afin que vous puissiez acceder à votre espace client</p><p><u>Information de connexion :</u></p><p>Login : ".$user->getLogin()."</p><p>Email : ".$user->getEmail()."</p><p>Mot de passe : ".$password. "</p>");
+                ->html("<h2>Votre rapportOld d'étude est enfin prêt !</h2><p>Nous vous avons créer un login et un mot de passe afin que vous puissiez acceder à votre espace client</p><p><u>Information de connexion :</u></p><p>Login : ".$user->getLogin()."</p><p>Email : ".$user->getEmail()."</p><p>Mot de passe : ".$password. "</p>");
 
             $mailer->send($email);
             return $this->redirectToRoute('app_back_home', [], Response::HTTP_SEE_OTHER);
