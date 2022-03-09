@@ -6,32 +6,50 @@
 {% block body %}
     <h2>home du Front</h2>
     <form action="">
-        <input type="file" id="myFile" name="filename">
+        <input type="file" id="myFile"  name="filename">
     </form>
-{% endblock %}
 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
 <script>
 
-    const csv = document.getElementById('myFile');
-    // Parse CSV string
-    var data = Papa.parse(csv);
+    $("#myFile").change(function(){
+        alert('cfvgbh');
+            var ExcelToJSON = function() {
+                console.log('here');
+                var myfile = $("#myFile");
+                this.parseExcel = function(myfile) {
+                    console.log('rrr');
 
-    // Convert back to CSV
-    var csv = Papa.unparse(data);
+                    var reader = new FileReader();
 
-    // Parse local CSV file
-    Papa.parse(file, {
-        complete: function(results) {
-            console.log("Finished:", results.data);
-        }
-    });
+                    reader.onload = function(e) {
+                        console.log('aaa');
 
-    // Stream big file in worker thread
-    Papa.parse(bigFile, {
-        worker: true,
-        step: function(results) {
-            console.log("Row:", results.data);
-        }
-    });
+                        var data = e.target.result;
+                        var workbook = XLSX.read(data, {
+                            type: 'binary'
+                        });
+
+                        workbook.SheetNames.forEach(function(sheetName) {
+                            // Here is your object
+                            var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+                            var json_object = JSON.stringify(XL_row_object);
+                            console.log(json_object);
+                        })
+                    };
+                    reader.onerror = function(ex) {
+                        console.log(ex);
+                    };
+                    console.log(reader.readAsBinaryString(myfile));
+                };
+            };
+
+    })
+
 
 </script>
+
+
+{% endblock %}
