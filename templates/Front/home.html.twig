@@ -96,9 +96,23 @@
             headerCell.html("mesure");
             row.append(headerCell);
 
+
+            let datajson = [];
+
             //Add the data rows from Excel file.
             for (var i = 0; i < excelRows.length; i++) {
                 //Add the data row.
+                let json = JSON.stringify({
+                    "id": i,
+                    "product_code": excelRows[i].product_code,
+                    "user_id": excelRows[i].user_id,
+                    "zone_code": excelRows[i].zone_code,
+                    "score_skinbiosense": excelRows[i].score_skinbiosense,
+                    "session_id": excelRows[i].session_id,
+                    "mesure": excelRows[i].mesure
+                });
+
+                datajson.push(json);
                 var row = $(table[0].insertRow(-1));
 
                 //Add the data cells.
@@ -126,11 +140,13 @@
                 cell.html(excelRows[i].mesure);
                 row.append(cell);
             }
+            console.log(datajson);
 
             var dvExcel = $("#dvExcel");
             dvExcel.html("");
             dvExcel.append(table);
         };
+
     </script>
 
 
