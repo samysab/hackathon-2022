@@ -16,7 +16,7 @@
                         <div class="d-flex justify-content-between">
                             <div class="input-group mb-3 mr-2">
                                 <label class="input-group-text" for="axeX_1">Axe X</label>
-                                <select class="form-select" id="axeX_1" onchange="hideEntete('axeX_1')">
+                                <select class="form-select" id="axeX_1" onchange="hideEntete('axeX_1')" >
                                     <option selected>Choose...</option>
                                     <option value="product_code">product_code</option>
                                     <option value="user_id">user_id</option>
@@ -31,7 +31,7 @@
                     <div class="col">
                         <div class="input-group mb-3">
                             <label class="input-group-text" for="axeY_1">Axe Y</label>
-                            <select class="form-select" id="axeY_1">
+                            <select class="form-select" onchange="getJsonData()" id="axeY_1">
                                 <option selected>Choose...</option>
                                 <option value="product_code">product_code</option>
                                 <option value="user_id">user_id</option>
@@ -47,10 +47,10 @@
                             <label class="input-group-text" for="typeGraph_1">Type de graphique</label>
                             <select class="form-select" id="typeGraph_1">
                                 <option selected>Choose...</option>
-                                <option value="bar">bar</option>
+                                <option value="bar">Bar</option>
                                 <option value="bubble">Bulle</option>
                                 <option value="doughnut">Doughnut</option>
-                                <option value="line">ligne</option>
+                                <option value="line">Line</option>
                                 <option value="polarArea">Polar</option>
                                 <option value="radar">Radar</option>
                                 <option value="scatter">Scatter</option>
@@ -59,18 +59,24 @@
                         </div>
                     </div>
                     <div class="col">
+                        <textarea class="form-control" placeholder="Nommez votre Graph" id="title_1" style="height: 100px"></textarea>
+                        <label>Titre du graph</label>
                         <div class="form-floating">
                             <textarea class="form-control" placeholder="Saisir vos notes d'observation" id="observation_1" style="height: 100px"></textarea>
-                            <label for="floatingTextarea2">Description du graphique</label>
+                            <label for="floatingTextarea2">Description du graph</label>
+                            <button type="button" onclick="chart()" class="btn btn-outline-success ms-2" id="createChart">Aperçu du graphique</button>
                         </div>
                     </div>
+                </div>
+                <div id="pdf-content">
+                    <canvas id="myChart"></canvas>
                 </div>
             </div>
         </div>
         <input type="hidden" value="1" id="idxGraph">
         <button type="button" class="btn btn-outline-success ms-2" onclick="addNewgraph()">Ajouter un nouveau graph</button>
     </div>
-    <button type="button" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
+    <button type="button" onclick="generatePDF()" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
@@ -78,7 +84,27 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/xlsx.full.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/jszip.js"></script>
+    <script src="{{ asset('html2pdf.bundle.min.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
+
+        axeX1 = '';
+        axeYdata = [];
+        axeXdata = [];
+        axeY1 = '';
+        datajson = [];
+        rows = '';
+
+
+        // GENERATE PDF
+        function generatePDF() {
+            // Choose the element that our invoice is rendered in.
+            const element = document.getElementById('pdf-content');
+            // Choose the element and save the PDF for our user.
+            html2pdf().from(element).save();
+        }
+
+        //UPLOAD FILE
         $("body").on("click", "#upload", function () {
             //Reference the FileUpload element.
             var fileUpload = $("#fileUpload")[0];
@@ -121,9 +147,13 @@
             });
 
             //Fetch the name of First Sheet.
-            var firstSheet = workbook.SheetNames[1];
+            var firstSheet = workbook.Sheets[workbook.SheetNames[1]];
 
-            //Read all rows from First Sheet into an JSON array.
+// Les lignes au format JSON
+
+            rows = XLSX.utils.sheet_to_json(firstSheet);
+
+                //Read all rows from First Sheet into an JSON array.
             var excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet]);
 
             //Create a HTML Table element.
@@ -159,56 +189,19 @@
             row.append(headerCell);
 
 
-            let datajson = [];
-
             //Add the data rows from Excel file.
-            for (var i = 0; i < excelRows.length; i++) {
-                //Add the data row.
-                let json = JSON.stringify({
-                    "id": i,
-                    "product_code": excelRows[i].product_code,
-                    "user_id": excelRows[i].user_id,
-                    "zone_code": excelRows[i].zone_code,
-                    "score_skinbiosense": excelRows[i].score_skinbiosense,
-                    "session_id": excelRows[i].session_id,
-                    "mesure": excelRows[i].mesure
-                });
 
-                datajson.push(json);
-                var row = $(table[0].insertRow(-1));
 
-                //Add the data cells.
-                var cell = $("<td />");
-                cell.html(excelRows[i].product_code);
-                row.append(cell);
-
-                cell = $("<td />");
-                cell.html(excelRows[i].user_id);
-                row.append(cell);
-
-                cell = $("<td />");
-                cell.html(excelRows[i].zone_code);
-                row.append(cell);
-
-                cell = $("<td />");
-                cell.html(excelRows[i].score_skinbiosense);
-                row.append(cell);
-
-                cell = $("<td />");
-                cell.html(excelRows[i].session_id);
-                row.append(cell);
-
-                cell = $("<td />");
-                cell.html(excelRows[i].mesure);
-                row.append(cell);
-            }
-
-            $('#step1').removeClass("d-none")
-            $("#btnCreerRapport").removeClass("d-none")
+            $('#step1').removeClass("d-none");
+            $("#btnCreerRapport").removeClass("d-none");
         };
-       function hideEntete(id) {
-           let idxtmp = id.split("_")
-           let idx = idxtmp[1]
+
+        // AXE X REMOVE PARAMETERS
+        function hideEntete(id) {
+            axeX1 = $('#axeX_1').val();
+
+            let idxtmp = id.split("_")
+            let idx = idxtmp[1]
             $("#axeY_"+idx+" option").each( function () {
                 if ($("#axeX_"+idx).val() === $(this).val()){
                     $(this).addClass('d-none')
@@ -218,6 +211,18 @@
             })
         }
 
+        function getJsonData(){
+            axeY1 = $('#axeY_1').val();
+            console.log(axeY1);
+            for (const row of rows) {
+                axeYdata.push(row[axeY1]);
+                axeXdata.push(row[axeX1]);
+            }
+            console.log(axeXdata);
+            console.log(axeYdata);
+        }
+
+        // ADD NEW PARAMETERS CHART
         function addNewgraph(){
             let idx = parseInt($('#idxGraph').val())
             idx += 1
@@ -280,6 +285,40 @@
             $(".container").append(html)
         }
 
+        function chart () {
+            // CHART
+
+            if(window.myChart instanceof Chart)
+            {
+                axeYdata = [];
+                axeXdata = [];
+                window.myChart.destroy();
+                getJsonData();
+            }
+
+            const typeGraph = $('#typeGraph_1').val();
+
+                const data = {
+                    labels: axeXdata,
+                    datasets: [{
+                        label: 'My First dataset',
+                        backgroundColor: 'rgb(255, 99, 132)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        data: axeYdata,
+                    }]
+                };
+
+                const config = {
+                    type: typeGraph,
+                    data: data,
+                    options: {}
+                };
+
+            window.myChart = new Chart(
+                    document.getElementById('myChart'),
+                    config
+                );
+        }
     </script>
 
 {% endblock %}
