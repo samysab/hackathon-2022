@@ -60,13 +60,12 @@
                     </div>
                     <div class="col">
                         <textarea class="form-control" placeholder="Nommez votre Graph" id="title_1" style="height: 100px"></textarea>
-                        <label>Titre du graph</label>
-                        <div class="form-floating">
-                            <textarea class="form-control" placeholder="Saisir vos notes d'observation" id="observation_1" style="height: 100px"></textarea>
-                            <label for="floatingTextarea2">Description du graph</label>
-                            <button type="button" onclick="chart()" class="btn btn-outline-success ms-2" id="createChart">Aperçu du graphique</button>
-                        </div>
                     </div>
+                    <div class="col">
+                        <textarea class="form-control" placeholder="Saisir vos notes d'observation" id="observation_1" style="height: 100px"></textarea>
+                    </div>
+                    <button type="button" onclick="chart()" class="btn btn-outline-success ms-2" id="createChart">Aperçu du graphique</button>
+
                 </div>
                 <div id="pdf-content">
                     <canvas id="myChart"></canvas>
@@ -275,12 +274,13 @@
                 '                        </div>\n' +
                 '                    </div>\n' +
                 '                   <div class="col">\n' +
-                '                        <div class="form-floating">\n' +
-                '                            <textarea class="form-control" placeholder="Saisir vos notes d\'observation" id="observation_'+idx+' style="height: 100px"></textarea>\n' +
-                '                            <label for="floatingTextarea2">Description du graphique</label>\n' +
-                '                        </div>\n' +
-                '                    </div></n>' +
-                '                </div>'
+                '                       <textarea class="form-control" placeholder="Nommez votre Graph" id="title_1" style="height: 100px"></textarea>\n' +
+                '                   </div>\n' +
+                '                   <div class="col">\n' +
+                '                       <textarea class="form-control" placeholder="Saisir vos notes d\'observation" id="observation_1" style="height: 100px"></textarea>\n' +
+                '                   </div>\n' +
+                '                   <button type="button" onclick="chart()" class="btn btn-outline-success ms-2" id="createChart">Aperçu du graphique</button>\n' +
+            '                </div>\n'
 
             $(".container").append(html)
         }
