@@ -11,7 +11,7 @@ $(function () {
     // ============================================================== 
 
     //ct-visits
-    new Chartist.Line('#ct-visits', {
+/*    new Chartist.Line('#ct-visits', {
         labels: ['2008', '2009', '2010', '2011', '2012', '2013', '2014', '2015'],
         series: [
             [5, 2, 7, 4, 5, 3, 5, 4]
@@ -31,7 +31,7 @@ $(function () {
             }
         },
         showArea: true
-    });
+    });*/
 
 
     var chart = [chart];
