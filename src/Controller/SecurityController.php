@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\RegisterType;
 use App\Form\GenerateLoginType;
+use App\Repository\RapportRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -109,9 +111,9 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/admin/home', name: 'app_back_home')]
-    public function displayBack(AuthenticationUtils $authenticationUtils): Response
+    public function displayBack(AuthenticationUtils $authenticationUtils, RapportRepository $rapportRepository, UserRepository $userRepository): Response
     {
-        return $this->render('Back/home.html.twig');
+        return $this->render('Back/home.html.twig', ['rapports' => $rapportRepository->findAll(), 'users' => $userRepository->findAll()]);
     }
     #[Route(path: '/', name: 'app_front_home')]
     public function displayFront(AuthenticationUtils $authenticationUtils): Response
