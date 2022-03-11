@@ -30,6 +30,7 @@ class SecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setRoles(["ROLE_USER"]);
+            dd($passwordHasher->hashPassword($user, $user->getPassword()));
             $user->setPassword($passwordHasher->hashPassword($user, $user->getPassword()));
             $entityManager->persist($user);
             $entityManager->flush();
@@ -71,7 +72,7 @@ class SecurityController extends AbstractController
 
             $email = (new Email())
                 ->from('wbhackathon2022@example.com')
-                ->to($user->getEmail())
+                ->to("samy.sab92@gmail.com")
                 ->subject("[WB] Votre rapportOld d'étude est prêt !")
                 ->text('Sending emails is fun again!')
                 ->html("<h2>Votre rapportOld d'étude est enfin prêt !</h2><p>Nous vous avons créer un login et un mot de passe afin que vous puissiez acceder à votre espace client</p><p><u>Information de connexion :</u></p><p>Login : ".$user->getLogin()."</p><p>Email : ".$user->getEmail()."</p><p>Mot de passe : ".$password. "</p>");
