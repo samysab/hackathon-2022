@@ -4,8 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Rapport;
 use App\Entity\Upload;
-use App\Entity\User;
-use App\Form\GenerateLoginType;
 use App\Form\UploadType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,9 +15,6 @@ use App\Form\RapportType;
 use App\Repository\RapportRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class RapportController extends AbstractController
@@ -33,6 +28,7 @@ class RapportController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
+            dump($request->request->get('inputInvitation'));
 
             $file = $upload->getName();
             $filename = md5(uniqid()).'.pdf';
@@ -46,7 +42,6 @@ class RapportController extends AbstractController
             $rapport->setPrice(0);
 
             $user = $userRepository->findBy(array('id' => '1'));
-
             $rapport->setUserId($user[0]);
             $rapport->setUpload($upload);
 
@@ -94,35 +89,11 @@ class RapportController extends AbstractController
         return $this->render('base.html.twig', ['formUpload' => $form->createView()]);
     }
     #[Route('/admin/creation-rapport', name: 'app_rapport_creation')]
-    public function creationRapport(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
+    public function creationRapport(): Response
     {
-        $user = new User();
-
-        $form = $this->createForm(GenerateLoginType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@&-_';
-            $password = $this->generate_string($permitted_chars, 10);
-            $user->setPassword($passwordHasher->hashPassword($user,$password ));
-            $user->setRoles(["ROLE_USER"]);
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            $email = (new Email())
-                ->from('wbhackathon2022@example.com')
-                ->to($user->getEmail())
-                ->subject("[WB] Votre rapportOld d'étude est prêt !")
-                ->text('Sending emails is fun again!')
-                ->html("<h2>Votre rapportOld d'étude est enfin prêt !</h2><p>Nous vous avons créer un login et un mot de passe afin que vous puissiez acceder à votre espace client</p><p><u>Information de connexion :</u></p><p>Login : ".$user->getLogin()."</p><p>Email : ".$user->getEmail()."</p><p>Mot de passe : ".$password. "</p>");
-
-            $mailer->send($email);
-            return $this->redirectToRoute('app_back_home', [], Response::HTTP_SEE_OTHER);
-        }
 
         return $this->render('Back/rapport/index.html.twig', [
             'controller_name' => 'RapportController',
-            'formInvitations'=> $form
         ]);
     }
 
