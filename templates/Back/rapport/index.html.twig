@@ -1,31 +1,72 @@
-{% extends 'base.html.twig' %}
+{% extends 'base_back.html.twig' %}
 
-{% block title %}Hello RapportController!{% endblock %}
+{% block title %}[WB] Rapport d'étude{% endblock %}
 
 {% block body %}
-    <h2>home du Front</h2>
-    <input type="file" id="fileUpload" />
-    <input type="button" id="upload" value="Upload" />
-    <hr />
-    <div class="d-none" id="step1">
-        <h2>Personnalisation du rapport</h2>
-        <div class="container">
-            <div id="graph_1">
-                <div class="row">
-                    <div class="col mb-5">
-                        <div class="d-flex justify-content-between">
-                            <div class="input-group mb-3 mr-2">
-                                <label class="input-group-text" for="axeX_1">Axe X</label>
-                                <select class="form-select" id="axeX_1" onchange="hideEntete('axeX_1')" >
-                                    <option selected>Choose...</option>
-                                    <option value="product_code">product_code</option>
-                                    <option value="user_id">user_id</option>
-                                    <option value="zone_code">zone_code</option>
-                                    <option value="score_skinbiosense">score_skinbiosense</option>
-                                    <option value="session_id">session_id</option>
-                                    <option value="mesure">mesure</option>
-                                </select>
+    <div class="container">
+        <div class="row ms-3">
+            <div class="d-flex justify-content-start">
+                <input type="file" id="fileUpload" />
+                <input type="button" id="uploadExcel" value="Upload" />
+            </div>
+            <div class="d-none" id="step1">
+                <h2>Personnalisation du rapport</h2>
+                <div class="container" id="containerGraph">
+                    <div id="graph_1">
+                        <div class="row">
+                            <div class="col mb-5">
+                                <div class="d-flex justify-content-between">
+                                    <div class="input-group mb-3 mr-2">
+                                        <label class="input-group-text" for="axeX_1">Axe X</label>
+                                        <select class="form-select" id="axeX_1" onchange="hideEntete('axeX_1')" >
+                                            <option selected>Choose...</option>
+                                            <option value="product_code">product_code</option>
+                                            <option value="user_id">user_id</option>
+                                            <option value="zone_code">zone_code</option>
+                                            <option value="score_skinbiosense">score_skinbiosense</option>
+                                            <option value="session_id">session_id</option>
+                                            <option value="mesure">mesure</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <label class="input-group-text" for="axeY_1">Axe Y</label>
+                                    <select class="form-select" onchange="getJsonData()" id="axeY_1">
+                                        <option selected>Choose...</option>
+                                        <option value="product_code">product_code</option>
+                                        <option value="user_id">user_id</option>
+                                        <option value="zone_code">zone_code</option>
+                                        <option value="score_skinbiosense">score_skinbiosense</option>
+                                        <option value="session_id">session_id</option>
+                                        <option value="mesure">mesure</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <label class="input-group-text" for="typeGraph_1">Type de graphique</label>
+                                    <select class="form-select" id="typeGraph_1">
+                                        <option selected>Choose...</option>
+                                        <option value="bar">Bar</option>
+                                        <option value="bubble">Bulle</option>
+                                        <option value="doughnut">Doughnut</option>
+                                        <option value="line">Line</option>
+                                        <option value="polarArea">Polar</option>
+                                        <option value="radar">Radar</option>
+                                        <option value="scatter">Scatter</option>
+                                        <!-- TODO !-->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <textarea class="form-control" oninput="designPDF()" placeholder="Nommez votre Graph" id="title_1" style="height: 100px"></textarea>
+                            </div>
+                            <div class="col">
+                                <textarea class="form-control" oninput="designPDF()" placeholder="Saisir vos notes d'observation" id="observation_1" style="height: 100px"></textarea>
+                            </div>
+                            <button type="button" onclick="chart();displayArea()" class="btn btn-outline-success ms-2" id="createChart">Aperçu du graphique</button>
                         </div>
                     </div>
                     <div class="col">
@@ -66,25 +107,36 @@
                     </div>
                     <button type="button" onclick="chart();displayArea()" class="btn btn-outline-success ms-2" id="createChart">Aperçu du graphique</button>
                 </div>
-                <div id="area">
-                    <div id="pdf-content" style="text-align:center;display:flex;flex-direction:column;margin-top:1em;margin-top:1em;border-radius:10px;width:100%;">
-                        <p id="pdf-title-graph1" ></p>
-                        <p id="pdf-desc-graph1" ></p>
-                            <canvas class="d-flex justify-content-center" style="height: 70%;padding: 0;margin: auto;display: block;width: 600px;" id="myChart"></canvas>
-                        <p id="pdf-title-graph2"></p>
-                        <p id="pdf-desc-graph2"></p>
-                        <canvas style="height: 70%;padding: 0;margin: auto;display: block;width: 600px" id="myChart2"></canvas>
+                        <div id="area">
+                            <div id="pdf-content" style="text-align: center;display: flex;flex-direction: column;;margin-top: 1em;margin-top: 1emborder-radius: 10px;">
+
+                                <p id="pdf-title-graph1" ></p>
+                                <canvas style="height: 70%;padding: 0;margin-right: auto;display: block;width: 600px; align-items: center;" id="myChart"></canvas>
+                                <p id="pdf-desc-graph1" ></p>
+                                <hr/>
+                                <p id="pdf-title-graph2" oninput="designPDF()"></p>
+                                <canvas style="height: 70%;padding: 0;margin-right: auto;display: block;width: 600px; align-items: center;" id="myChart2"></canvas>
+                                <p id="pdf-desc-graph2" oninput="designPDF()"></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <input type="hidden" value="1" id="idxGraph">
+                <button type="button" id="addNewGraph" class="btn btn-outline-success ms-2" onclick="addNewgraph()">Ajouter un nouveau graph</button>
+            </div>
+            <button type="button" onclick="pdfvalid()" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
+            <div id="uploadRapportDiv" class="d-none">
+                <hr>
+                <h2>Chargement du fichier PDF</h2>
+                <p>Inserer le rapport d'étude sous format PDF</p>
+                {{ form(formUpload) }}
             </div>
         </div>
-        <input type="hidden" value="1" id="idxGraph">
-        <button type="button" class="btn btn-outline-success ms-2" onclick="addNewgraph()">Ajouter un nouveau graph</button>
     </div>
     <button type="button" onclick="pdfvalid()" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
 
  {{ form(formUpload) }}
- 
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
@@ -93,7 +145,6 @@
     <script src="{{ asset('html2pdf.bundle.min.js')}}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
-
         axeYdata = [];
         axeXdata = [];
         axeY2data = [];
@@ -104,7 +155,6 @@
         axeY2 = '';
         datajson = [];
         rows = '';
-
         function displayArea(){
             const area = document.getElementById('area');
             area.style.boxShadow = "aqua";
@@ -112,7 +162,6 @@
         }
 
         function designChart1PDF (){
-
             const title = document.getElementById('title_1').value;
             const titleForPDF = document.getElementById('pdf-title-graph1');
             const desc = document.getElementById('observation_1').value;
@@ -142,28 +191,25 @@
                 html2canvas:  { scale: 2 },
                 jsPDF:        { unit: 'cm', format: 'A4', orientation: 'portrait' }
             };
-
-        // New Promise-based usage:
-             html2pdf().set(opt).from(element).save();
+            // New Promise-based usage:
+            html2pdf().set(opt).from(element).save();
             // Choose the element and save the PDF for our user.
         }
-
         function pdfvalid()
         {
             const pdf = setTimeout(generatePDF, 2000);
+            $('#uploadRapportDiv').removeClass('d-none')
+            $('#btnCreerRapport').addClass('d-none')
         }
-
         //UPLOAD FILE
-        $("body").on("click", "#upload", function () {
+        $("body").on("click", "#uploadExcel", function () {
             //Reference the FileUpload element.
             var fileUpload = $("#fileUpload")[0];
-
             //Validate whether File is valid Excel file.
             var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
             if (regex.test(fileUpload.value.toLowerCase())) {
                 if (typeof (FileReader) != "undefined") {
                     var reader = new FileReader();
-
                     //For Browsers other than IE.
                     if (reader.readAsBinaryString) {
                         reader.onload = function (e) {
@@ -194,25 +240,20 @@
             var workbook = XLSX.read(data, {
                 type: 'binary'
             });
-
             //Fetch the name of First Sheet.
             var firstSheet = workbook.Sheets[workbook.SheetNames[1]];
-
             // Les lignes au format JSON
 
             rows = XLSX.utils.sheet_to_json(firstSheet);
-
-                //Read all rows from First Sheet into an JSON array.
+            //Read all rows from First Sheet into an JSON array.
             var excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet]);
 
             $('#step1').removeClass("d-none");
             $("#btnCreerRapport").removeClass("d-none");
         };
-
         // AXE X REMOVE PARAMETERS
         function hideEntete(id) {
             axeX1 = $('#axeX_1').val();
-
             let idxtmp = id.split("_")
             let idx = idxtmp[1]
             $("#axeY_"+idx+" option").each( function () {
@@ -223,7 +264,6 @@
                 }
             })
         }
-
         function getJsonData(){
             axeY1 = $('#axeY_1').val();
             console.log(axeY1);
@@ -236,7 +276,6 @@
         }
         function getJsonData2(){
             axeX2 = $('#axeX_2').val();
-
             axeY2 = $('#axeY_2').val();
             console.log(axeY2);
             for (const row of rows) {
@@ -246,14 +285,13 @@
             console.log(axeX2data);
             console.log(axeY2data);
         }
-
         // ADD NEW PARAMETERS CHART
         function addNewgraph(){
             let idx = parseInt($('#idxGraph').val())
             idx += 1
             $('#idxGraph').val(idx)
             let html = '<div id="graph_'+idx+'">' +
-                '               <div class="row mb-4">\n' +
+                '               <div class="row mb-4 mt-4">\n' +
                 '                    <div class="col">\n' +
                 '                        <div class="d-flex justify-content-between">\n' +
                 '                            <div class="input-group mb-3 mr-2">\n' +
@@ -307,13 +345,11 @@
                 '                   </div>\n' +
                 '                   <button type="button" onclick="chart2()" class="btn btn-outline-success ms-2" id="createChart2">Aperçu du graphique</button>\n' +
                 '                </div>\n'
-
-            $(".container").append(html)
+            $("#containerGraph").append(html)
+            $('#addNewGraph').hide()
         }
-
         function chart () {
             // CHART
-
             if(window.myChart instanceof Chart)
             {
                 axeYdata = [];
@@ -321,15 +357,13 @@
                 window.myChart.destroy();
                 getJsonData();
             }
-
-           if(window.myChart2 instanceof Chart)
+            if(window.myChart2 instanceof Chart)
             {
                 axeY2data = [];
                 axeX2data = [];
                 window.myChart2.destroy();
                 getJsonData2();
             }
-
             const typeGraph = $('#typeGraph_1').val();
 
                 const data = {
@@ -347,17 +381,13 @@
                 data: data,
                 options: {}
             };
-
-                window.myChart = new Chart(
-                    document.getElementById('myChart'),
-                    config
-                );
-
+            window.myChart = new Chart(
+                document.getElementById('myChart'),
+                config
+            );
         }
-
         function chart2 () {
             // CHART
-
             if(window.myChart2 instanceof Chart)
             {
                 axeY2data = [];
@@ -365,9 +395,7 @@
                 window.myChart.destroy();
                 getJsonData2();
             }
-
             const typeGraph2 = $('#typeGraph_2').val();
-
             const data2 = {
                 labels: axeX2data,
                 datasets: [{
@@ -377,19 +405,15 @@
                     data: axeY2data,
                 }]
             };
-
             const config2 = {
                 type: typeGraph2,
                 data: data2,
                 options: {}
             };
-
             window.myChart2 = new Chart(
                 document.getElementById('myChart2'),
                 config2
             );
-
         }
     </script>
-
 {% endblock %}

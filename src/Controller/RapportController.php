@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Rapport;
 use App\Entity\Upload;
+use App\Entity\User;
+use App\Form\GenerateLoginType;
 use App\Form\UploadType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,8 +13,13 @@ use phpDocumentor\Reflection\DocBlock\Tags\Throws;
 use phpDocumentor\Reflection\Types\This;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Form\RapportType;
+use App\Repository\RapportRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class RapportController extends AbstractController
@@ -86,23 +93,82 @@ class RapportController extends AbstractController
 
         return $this->render('base.html.twig', ['formUpload' => $form->createView()]);
     }
-
-    #[Route('/admin/uploadFileName', name: 'app_upload_fileName')]
-    public function uploadfileName(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/admin/creation-rapport', name: 'app_rapport_creation')]
+    public function creationRapport(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, MailerInterface $mailer): Response
     {
-        $upload = new Upload();
-        $form = $this->createForm(UploadType::class, $upload);
+        $user = new User();
 
+        $form = $this->createForm(GenerateLoginType::class, $user);
         $form->handleRequest($request);
-        $base64 = $request->request->get('dataDoc');
-        $fileContent = $base64;
-        $target_dir = "/pdf";
-        $decoded_file = base64_decode($base64);
-        $mime_type = finfo_buffer(finfo_open(), $decoded_file, FILEINFO_MIME_TYPE); // extract mime type
-        $file = md5(uniqid()).'.pdf';
-        $file_dir = $target_dir. uniqid().'.pdf';
-        file_put_contents($target_dir, $file);
 
-        return new JsonResponse($request->request->get('dataDoc'));
+        if ($form->isSubmitted() && $form->isValid()) {
+            $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@&-_';
+            $password = $this->generate_string($permitted_chars, 10);
+            $user->setPassword($passwordHasher->hashPassword($user,$password ));
+            $user->setRoles(["ROLE_USER"]);
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $email = (new Email())
+                ->from('wbhackathon2022@example.com')
+                ->to($user->getEmail())
+                ->subject("[WB] Votre rapportOld d'étude est prêt !")
+                ->text('Sending emails is fun again!')
+                ->html("<h2>Votre rapportOld d'étude est enfin prêt !</h2><p>Nous vous avons créer un login et un mot de passe afin que vous puissiez acceder à votre espace client</p><p><u>Information de connexion :</u></p><p>Login : ".$user->getLogin()."</p><p>Email : ".$user->getEmail()."</p><p>Mot de passe : ".$password. "</p>");
+
+            $mailer->send($email);
+            return $this->redirectToRoute('app_back_home', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('Back/rapport/index.html.twig', [
+            'controller_name' => 'RapportController',
+            'formInvitations'=> $form
+        ]);
+    }
+
+    #[Route('/admin/rapport/{id}', name: 'app_rapport_show', methods: ['GET'])]
+    public function show(Rapport $rapport): Response
+    {
+        return $this->render('Back/rapport/show.html.twig', [
+            'rapport' => $rapport,
+        ]);
+    }
+
+    #[Route('/admin/rapport/{id}/edit', name: 'app_rapport_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Rapport $rapport, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(RapportType::class, $rapport);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_rapport_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('rapport/edit.html.twig', [
+            'rapport' => $rapport,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'app_rapport_delete', methods: ['POST'])]
+    public function delete(Request $request, Rapport $rapport, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$rapport->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($rapport);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('app_rapport_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/mon-rapport', name: 'app_mon_rapport')]
+    public function monRapport(RapportRepository $rapportRepository): Response
+    {
+        return $this->render('rapport/index.html.twig', [
+            'controller_name' => 'RapportController',
+            'rapports' => $rapportRepository->findAll()
+        ]);
     }
 }
