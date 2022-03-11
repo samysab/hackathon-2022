@@ -59,26 +59,37 @@
                         </div>
                     </div>
                     <div class="col">
-                        <textarea class="form-control" placeholder="Nommez votre Graph" id="title_1" style="height: 100px"></textarea>
+                        <textarea class="form-control" oninput="designPDF()" placeholder="Nommez votre Graph" id="title_1" style="height: 100px"></textarea>
                     </div>
                     <div class="col">
-                        <textarea class="form-control" placeholder="Saisir vos notes d'observation" id="observation_1" style="height: 100px"></textarea>
+                        <textarea class="form-control" oninput="designPDF()" placeholder="Saisir vos notes d'observation" id="observation_1" style="height: 100px"></textarea>
                     </div>
-                    <button type="button" onclick="chart()" class="btn btn-outline-success ms-2" id="createChart">Aperçu du graphique</button>
-
+                    <button type="button" onclick="chart();displayArea()" class="btn btn-outline-success ms-2" id="createChart">Aperçu du graphique</button>
                 </div>
-                <div id="pdf-content">
-                    <canvas id="myChart"></canvas>
+                <div id="area">
+                <div id="pdf-content" style="text-align: center;display: flex;flex-direction: column;;margin-top: 1em;margin-top: 1emborder-radius: 10px;">
+
+                    <p id="pdf-title-graph1" ></p>
+                    <canvas style="height: 70%;padding: 0;margin-right: auto;display: block;width: 600px; align-items: center;" id="myChart"></canvas>
+                    <p id="pdf-desc-graph1" ></p>
+                    <hr/>
+                    <p id="pdf-title-graph2" oninput="designPDF()"></p>
+                    <canvas style="height: 70%;padding: 0;margin-right: auto;display: block;width: 600px; align-items: center;" id="myChart2"></canvas>
+                    <p id="pdf-desc-graph2" oninput="designPDF()"></p>
+                </div>
                 </div>
             </div>
         </div>
         <input type="hidden" value="1" id="idxGraph">
         <button type="button" class="btn btn-outline-success ms-2" onclick="addNewgraph()">Ajouter un nouveau graph</button>
     </div>
-    <button type="button" onclick="generatePDF()" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
 
-    {{ form(formUpload) }}
+   
 
+    <button type="button" onclick="pdfvalid()" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
+
+ {{ form(formUpload) }}
+ 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
@@ -88,20 +99,63 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
 
-        axeX1 = '';
         axeYdata = [];
         axeXdata = [];
+        axeY2data = [];
+        axeX2data = [];
+        axeX1 = '';
         axeY1 = '';
+        axeX2 = '';
+        axeY2 = '';
         datajson = [];
         rows = '';
 
+        function displayArea(){
+            const area = document.getElementById('area');
+            area.style.boxShadow = "aqua";
+            area.style.border = "solid 3px #7d7dd2";
+        }
+
+        function designPDF (){
+            const numberCharts = $("div[id^='graph_']").length;
+            const title = document.getElementById('title_1').value;
+            const titleForPDF = document.getElementById('pdf-title-graph1');
+            if(numberCharts > 1){
+                const title2 = document.getElementById('title_2').value;
+                const titleForPDF2 = document.getElementById('pdf-title-graph2');
+                const desc2 = document.getElementById('observation_2').value;
+                const descForPDF2 = document.getElementById('pdf-desc-graph2');
+                descForPDF2.innerHTML = desc2;
+                titleForPDF2.innerHTML = title2;
+            }
+            const desc = document.getElementById('observation_1').value;
+            const descForPDF = document.getElementById('pdf-desc-graph1');
+            descForPDF.innerHTML = desc;
+            titleForPDF.innerHTML = title;
+        }
 
         // GENERATE PDF
         function generatePDF() {
             // Choose the element that our invoice is rendered in.
             const element = document.getElementById('pdf-content');
+
+            console.log(element);
+            var opt = {
+                margin:       [1, 0, 0, 0],
+                pagebreak:    { after: 'canvas' },
+                filename:     'Rapport.pdf',
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'cm', format: 'A4', orientation: 'portrait' }
+            };
+
+        // New Promise-based usage:
+             html2pdf().set(opt).from(element).save();
             // Choose the element and save the PDF for our user.
-            html2pdf().from(element).save();
+        }
+
+        function pdfvalid()
+        {
+            const pdf = setTimeout(generatePDF, 2000);
         }
 
         //UPLOAD FILE
@@ -188,9 +242,7 @@
             headerCell.html("mesure");
             row.append(headerCell);
 
-
             //Add the data rows from Excel file.
-
 
             $('#step1').removeClass("d-none");
             $("#btnCreerRapport").removeClass("d-none");
@@ -221,6 +273,18 @@
             console.log(axeXdata);
             console.log(axeYdata);
         }
+        function getJsonData2(){
+            axeX2 = $('#axeX_2').val();
+
+            axeY2 = $('#axeY_2').val();
+            console.log(axeY2);
+            for (const row of rows) {
+                axeY2data.push(row[axeY2]);
+                axeX2data.push(row[axeX2]);
+            }
+            console.log(axeX2data);
+            console.log(axeY2data);
+        }
 
         // ADD NEW PARAMETERS CHART
         function addNewgraph(){
@@ -233,7 +297,7 @@
                 '                        <div class="d-flex justify-content-between">\n' +
                 '                            <div class="input-group mb-3 mr-2">\n' +
                 '                                <label class="input-group-text" for="axeX_'+idx+'">Axe X</label>\n' +
-                '                                <select class="form-select" id="axeX_'+idx+'" onchange="hideEntete(\'axeX_'+idx+'\')">\n' +
+                '                                <select class="form-select"  id="axeX_'+idx+'" onchange="hideEntete(\'axeX_'+idx+'\')">\n' +
                 '                                    <option selected>Choose...</option>\n' +
                 '                                    <option value="product_code">product_code</option>\n' +
                 '                                    <option value="user_id">user_id</option>\n' +
@@ -248,7 +312,7 @@
                 '                    <div class="col">\n' +
                 '                        <div class="input-group mb-3">\n' +
                 '                            <label class="input-group-text" for="axeY_'+idx+'">Axe Y</label>\n' +
-                '                            <select class="form-select" id="axeY_'+idx+'">\n' +
+                '                            <select class="form-select" onchange="getJsonData2()" id="axeY_'+idx+'">\n' +
                 '                                <option selected>Choose...</option>\n' +
                 '                                <option value="product_code">product_code</option>\n' +
                 '                                <option value="user_id">user_id</option>\n' +
@@ -264,10 +328,10 @@
                 '                            <label class="input-group-text" for="typeGraph_'+idx+'">Type de graphique</label>\n' +
                 '                            <select class="form-select" id="typeGraph_'+idx+'">\n' +
                 '                                <option selected>Choose...</option>\n' +
-                '                                <option value="bar">bar</option>\n' +
+                '                                <option value="bar">Bar</option>\n' +
                 '                                <option value="bubble">Bulle</option>\n' +
                 '                                <option value="doughnut">Doughnut</option>\n' +
-                '                                <option value="line">ligne</option>\n' +
+                '                                <option value="line">Ligne</option>\n' +
                 '                                <option value="polarArea">Polar</option>\n' +
                 '                                <option value="radar">Radar</option>\n' +
                 '                                <option value="scatter">Scatter</option>' +
@@ -275,13 +339,13 @@
                 '                        </div>\n' +
                 '                    </div>\n' +
                 '                   <div class="col">\n' +
-                '                       <textarea class="form-control" placeholder="Nommez votre Graph" id="title_1" style="height: 100px"></textarea>\n' +
+                '                       <textarea class="form-control" placeholder="Nommez votre Graph" id="title_2" style="height: 100px"></textarea>\n' +
                 '                   </div>\n' +
                 '                   <div class="col">\n' +
-                '                       <textarea class="form-control" placeholder="Saisir vos notes d\'observation" id="observation_1" style="height: 100px"></textarea>\n' +
+                '                       <textarea class="form-control" placeholder="Saisir vos notes d\'observation" id="observation_2" style="height: 100px"></textarea>\n' +
                 '                   </div>\n' +
-                '                   <button type="button" onclick="chart()" class="btn btn-outline-success ms-2" id="createChart"><a href="/admin/uploadFile" >Aperçu du graphique</a></button>\n' +
-            '                </div>\n'
+                '                   <button type="button" onclick="chart2()" class="btn btn-outline-success ms-2" id="createChart2">Aperçu du graphique</button>\n' +
+                '                </div>\n'
 
             $(".container").append(html)
         }
@@ -297,6 +361,14 @@
                 getJsonData();
             }
 
+           if(window.myChart2 instanceof Chart)
+            {
+                axeY2data = [];
+                axeX2data = [];
+                window.myChart2.destroy();
+                getJsonData2();
+            }
+
             const typeGraph = $('#typeGraph_1').val();
 
                 const data = {
@@ -309,16 +381,53 @@
                     }]
                 };
 
-                const config = {
-                    type: typeGraph,
-                    data: data,
-                    options: {}
-                };
+            const config = {
+                type: typeGraph,
+                data: data,
+                options: {}
+            };
 
-            window.myChart = new Chart(
+                window.myChart = new Chart(
                     document.getElementById('myChart'),
                     config
                 );
+
+        }
+
+        function chart2 () {
+            // CHART
+
+            if(window.myChart2 instanceof Chart)
+            {
+                axeY2data = [];
+                axeX2data = [];
+                window.myChart.destroy();
+                getJsonData2();
+            }
+
+            const typeGraph2 = $('#typeGraph_2').val();
+
+            const data2 = {
+                labels: axeX2data,
+                datasets: [{
+                    label: 'My First dataset',
+                    backgroundColor: 'rgb(255, 99, 132)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    data: axeY2data,
+                }]
+            };
+
+            const config2 = {
+                type: typeGraph2,
+                data: data2,
+                options: {}
+            };
+
+            window.myChart2 = new Chart(
+                document.getElementById('myChart2'),
+                config2
+            );
+
         }
     </script>
 
