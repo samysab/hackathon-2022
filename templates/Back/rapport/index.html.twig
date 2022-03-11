@@ -48,7 +48,7 @@
                             <select class="form-select" id="typeGraph_1">
                                 <option selected>Choose...</option>
                                 <option value="bar">Bar</option>
-                                <option value="bubble">Bulle</option>
+                                <option value="bubble">Bubble</option>
                                 <option value="doughnut">Doughnut</option>
                                 <option value="line">Line</option>
                                 <option value="polarArea">Polar</option>
@@ -59,33 +59,28 @@
                         </div>
                     </div>
                     <div class="col">
-                        <textarea class="form-control" oninput="designPDF()" placeholder="Nommez votre Graph" id="title_1" style="height: 100px"></textarea>
+                        <textarea class="form-control" oninput="designChart1PDF()" placeholder="Nommez votre Graph" id="title_1" style="height: 100px"></textarea>
                     </div>
                     <div class="col">
-                        <textarea class="form-control" oninput="designPDF()" placeholder="Saisir vos notes d'observation" id="observation_1" style="height: 100px"></textarea>
+                        <textarea class="form-control" oninput="designChart1PDF()" placeholder="Saisir vos notes d'observation" id="observation_1" style="height: 100px"></textarea>
                     </div>
                     <button type="button" onclick="chart();displayArea()" class="btn btn-outline-success ms-2" id="createChart">Aperçu du graphique</button>
                 </div>
                 <div id="area">
-                <div id="pdf-content" style="text-align: center;display: flex;flex-direction: column;;margin-top: 1em;margin-top: 1emborder-radius: 10px;">
-
-                    <p id="pdf-title-graph1" ></p>
-                    <canvas style="height: 70%;padding: 0;margin-right: auto;display: block;width: 600px; align-items: center;" id="myChart"></canvas>
-                    <p id="pdf-desc-graph1" ></p>
-                    <hr/>
-                    <p id="pdf-title-graph2" oninput="designPDF()"></p>
-                    <canvas style="height: 70%;padding: 0;margin-right: auto;display: block;width: 600px; align-items: center;" id="myChart2"></canvas>
-                    <p id="pdf-desc-graph2" oninput="designPDF()"></p>
-                </div>
+                    <div id="pdf-content" style="text-align:center;display:flex;flex-direction:column;margin-top:1em;margin-top:1em;border-radius:10px;width:100%;">
+                        <p id="pdf-title-graph1" ></p>
+                        <p id="pdf-desc-graph1" ></p>
+                            <canvas class="d-flex justify-content-center" style="height: 70%;padding: 0;margin: auto;display: block;width: 600px;" id="myChart"></canvas>
+                        <p id="pdf-title-graph2"></p>
+                        <p id="pdf-desc-graph2"></p>
+                        <canvas style="height: 70%;padding: 0;margin: auto;display: block;width: 600px" id="myChart2"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
         <input type="hidden" value="1" id="idxGraph">
         <button type="button" class="btn btn-outline-success ms-2" onclick="addNewgraph()">Ajouter un nouveau graph</button>
     </div>
-
-   
-
     <button type="button" onclick="pdfvalid()" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
 
  {{ form(formUpload) }}
@@ -116,29 +111,29 @@
             area.style.border = "solid 3px #7d7dd2";
         }
 
-        function designPDF (){
-            const numberCharts = $("div[id^='graph_']").length;
+        function designChart1PDF (){
+
             const title = document.getElementById('title_1').value;
             const titleForPDF = document.getElementById('pdf-title-graph1');
-            if(numberCharts > 1){
-                const title2 = document.getElementById('title_2').value;
-                const titleForPDF2 = document.getElementById('pdf-title-graph2');
-                const desc2 = document.getElementById('observation_2').value;
-                const descForPDF2 = document.getElementById('pdf-desc-graph2');
-                descForPDF2.innerHTML = desc2;
-                titleForPDF2.innerHTML = title2;
-            }
             const desc = document.getElementById('observation_1').value;
             const descForPDF = document.getElementById('pdf-desc-graph1');
             descForPDF.innerHTML = desc;
             titleForPDF.innerHTML = title;
         }
 
+        function designChart2PDF (){
+            const title2 = document.getElementById('title_2').value;
+            const titleForPDF2 = document.getElementById('pdf-title-graph2');
+            const desc2 = document.getElementById('observation_2').value;
+            const descForPDF2 = document.getElementById('pdf-desc-graph2');
+            descForPDF2.innerHTML = desc2;
+            titleForPDF2.innerHTML = title2;
+        }
+
         // GENERATE PDF
         function generatePDF() {
             // Choose the element that our invoice is rendered in.
             const element = document.getElementById('pdf-content');
-
             console.log(element);
             var opt = {
                 margin:       [1, 0, 0, 0],
@@ -203,46 +198,12 @@
             //Fetch the name of First Sheet.
             var firstSheet = workbook.Sheets[workbook.SheetNames[1]];
 
-// Les lignes au format JSON
+            // Les lignes au format JSON
 
             rows = XLSX.utils.sheet_to_json(firstSheet);
 
                 //Read all rows from First Sheet into an JSON array.
             var excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet]);
-
-            //Create a HTML Table element.
-            var table = $("<table />");
-            table[0].border = "1";
-
-            //Add the header row.
-            var row = $(table[0].insertRow(-1));
-
-            //Add the header cells.
-            var headerCell = $("<th />");
-            headerCell.html("product_code");
-            row.append(headerCell);
-
-            var headerCell = $("<th />");
-            headerCell.html("user_id");
-            row.append(headerCell);
-
-            var headerCell = $("<th />");
-            headerCell.html("zone_code");
-            row.append(headerCell);
-
-            var headerCell = $("<th />");
-            headerCell.html("score_skinbiosense");
-            row.append(headerCell);
-
-            var headerCell = $("<th />");
-            headerCell.html("session_id");
-            row.append(headerCell);
-
-            var headerCell = $("<th />");
-            headerCell.html("mesure");
-            row.append(headerCell);
-
-            //Add the data rows from Excel file.
 
             $('#step1').removeClass("d-none");
             $("#btnCreerRapport").removeClass("d-none");
@@ -329,9 +290,9 @@
                 '                            <select class="form-select" id="typeGraph_'+idx+'">\n' +
                 '                                <option selected>Choose...</option>\n' +
                 '                                <option value="bar">Bar</option>\n' +
-                '                                <option value="bubble">Bulle</option>\n' +
+                '                                <option value="bubble">Bubble</option>\n' +
                 '                                <option value="doughnut">Doughnut</option>\n' +
-                '                                <option value="line">Ligne</option>\n' +
+                '                                <option value="line">Line</option>\n' +
                 '                                <option value="polarArea">Polar</option>\n' +
                 '                                <option value="radar">Radar</option>\n' +
                 '                                <option value="scatter">Scatter</option>' +
@@ -339,10 +300,10 @@
                 '                        </div>\n' +
                 '                    </div>\n' +
                 '                   <div class="col">\n' +
-                '                       <textarea class="form-control" placeholder="Nommez votre Graph" id="title_2" style="height: 100px"></textarea>\n' +
+                '                       <textarea class="form-control" oninput="designChart2PDF()" placeholder="Nommez votre Graph" id="title_2" style="height: 100px"></textarea>\n' +
                 '                   </div>\n' +
                 '                   <div class="col">\n' +
-                '                       <textarea class="form-control" placeholder="Saisir vos notes d\'observation" id="observation_2" style="height: 100px"></textarea>\n' +
+                '                       <textarea class="form-control" oninput="designChart2PDF()" placeholder="Saisir vos notes d\'observation" id="observation_2" style="height: 100px"></textarea>\n' +
                 '                   </div>\n' +
                 '                   <button type="button" onclick="chart2()" class="btn btn-outline-success ms-2" id="createChart2">Aperçu du graphique</button>\n' +
                 '                </div>\n'
@@ -374,7 +335,7 @@
                 const data = {
                     labels: axeXdata,
                     datasets: [{
-                        label: 'My First dataset',
+                        label: 'My dataset',
                         backgroundColor: 'rgb(255, 99, 132)',
                         borderColor: 'rgb(255, 99, 132)',
                         data: axeYdata,
@@ -410,7 +371,7 @@
             const data2 = {
                 labels: axeX2data,
                 datasets: [{
-                    label: 'My First dataset',
+                    label: 'My dataset',
                     backgroundColor: 'rgb(255, 99, 132)',
                     borderColor: 'rgb(255, 99, 132)',
                     data: axeY2data,
