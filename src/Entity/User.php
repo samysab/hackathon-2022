@@ -39,20 +39,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $password;
 
     /**
-     * @ORM\OneToMany(targetEntity=Rapport::class, mappedBy="user_id")
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $rapports;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Template::class, mappedBy="user_id")
-     */
-    private $templates;
-
-    public function __construct()
-    {
-        $this->rapports = new ArrayCollection();
-        $this->templates = new ArrayCollection();
-    }
+    private $login;
 
     public function getId(): ?int
     {
@@ -180,7 +169,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $template->setUserId(null);
             }
         }
+    }
 
+    public function getLogin(): ?string
+    {
+        return $this->login;
+    }
+
+    public function setLogin(?string $login): self
+    {
+        $this->login = $login;
         return $this;
     }
 }
