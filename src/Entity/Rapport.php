@@ -17,10 +17,6 @@ class Rapport
      */
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $file;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -52,32 +48,21 @@ class Rapport
      */
     private $descPrice;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=user::class, inversedBy="rapports")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $user_id;
+
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $title;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Upload::class, inversedBy="rapports")
+     */
+    private $upload;
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getFile(): ?string
-    {
-        return $this->file;
-    }
-
-    public function setFile(string $file): self
-    {
-        $this->file = $file;
-
-        return $this;
     }
 
     public function getNameColumnX(): ?string
@@ -172,6 +157,18 @@ class Rapport
     public function setTitle(?string $title): self
     {
         $this->title = $title;
+
+        return $this;
+    }
+
+    public function getUpload(): ?Upload
+    {
+        return $this->upload;
+    }
+
+    public function setUpload(?Upload $upload): self
+    {
+        $this->upload = $upload;
 
         return $this;
     }

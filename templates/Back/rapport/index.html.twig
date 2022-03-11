@@ -83,7 +83,13 @@
         <input type="hidden" value="1" id="idxGraph">
         <button type="button" class="btn btn-outline-success ms-2" onclick="addNewgraph()">Ajouter un nouveau graph</button>
     </div>
+
+   
+
     <button type="button" onclick="pdfvalid()" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
+
+ {{ form(formUpload) }}
+ 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
@@ -339,7 +345,7 @@
                 '                       <textarea class="form-control" placeholder="Saisir vos notes d\'observation" id="observation_2" style="height: 100px"></textarea>\n' +
                 '                   </div>\n' +
                 '                   <button type="button" onclick="chart2()" class="btn btn-outline-success ms-2" id="createChart2">Aperçu du graphique</button>\n' +
-            '                </div>\n'
+                '                </div>\n'
 
             $(".container").append(html)
         }

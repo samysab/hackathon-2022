@@ -32,11 +32,6 @@ class Template
      */
     private $address;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=user::class, inversedBy="templates")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $user_id;
 
     public function getId(): ?int
     {
@@ -75,18 +70,6 @@ class Template
     public function setAddress(?string $address): self
     {
         $this->address = $address;
-
-        return $this;
-    }
-
-    public function getUserId(): ?user
-    {
-        return $this->user_id;
-    }
-
-    public function setUserId(?user $user_id): self
-    {
-        $this->user_id = $user_id;
 
         return $this;
     }
