@@ -84,7 +84,6 @@
         <button type="button" class="btn btn-outline-success ms-2" onclick="addNewgraph()">Ajouter un nouveau graph</button>
     </div>
     <button type="button" onclick="pdfvalid()" class="btn btn-outline-success ms-2 d-none" id="btnCreerRapport">Créer le rapport</button>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
@@ -363,39 +362,6 @@
                 window.myChart2.destroy();
                 getJsonData2();
             }
-
-            //const numberCharts = $("div[id^='graph_']").length;
-
-            /* if (numberCharts > 1){
-                for(let i = 0; i < numberCharts; i++) {
-
-                    const typeGraph2 = $('#typeGraph_2').val();
-
-                    const data2 = {
-                        labels: axeX2data,
-                        datasets: [{
-                            label: 'My First dataset',
-                            backgroundColor: 'rgb(255, 99, 132)',
-                            borderColor: 'rgb(255, 99, 132)',
-                            data: axeY2data,
-                        }]
-                    };
-
-                    const config2 = {
-                        type: typeGraph2,
-                        data: data2,
-                        options: {}
-                    };
-
-                    window.myChart = new Chart(
-                        document.getElementById('myChart2'),
-                        config2
-                    );
-
-                    const multiplecharts= document.getElementById('multiplecharts');
-                    multiplecharts.innerHTML = typeGraph2;
-                }
-            }*/
 
             const typeGraph = $('#typeGraph_1').val();
 
