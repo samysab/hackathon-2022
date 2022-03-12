@@ -14,8 +14,8 @@ class UploadType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('name', FileType::class,['required'=>false])
-            ->add('submit', SubmitType::class)
+            ->add('name', FileType::class,['required'=>false, 'label' => "Charger le rapport d'étude   "])
+            ->add('submit', SubmitType::class, ['attr' => array('class' => 'btn btn-outline-success'), 'label' => "Envoyer l'invitation"])
         ;
     }
 

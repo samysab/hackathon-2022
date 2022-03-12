@@ -11,13 +11,7 @@
         <thead>
             <tr>
                 <th>Id</th>
-                <th>File</th>
-                <th>NameColumnX</th>
-                <th>NameColumnY</th>
-                <th>TypeChart</th>
-                <th>ChartDesc</th>
-                <th>Price</th>
-                <th>DescPrice</th>
+                <th>Nom du fichier</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -25,15 +19,9 @@
         {% for rapport in rapports %}
             <tr>
                 <td>{{ rapport.id }}</td>
-                <td>{{ rapport.file }}</td>
-                <td>{{ rapport.nameColumnX }}</td>
-                <td>{{ rapport.nameColumnY }}</td>
-                <td>{{ rapport.typeChart }}</td>
-                <td>{{ rapport.chartDesc }}</td>
-                <td>{{ rapport.price }}</td>
-                <td>{{ rapport.descPrice }}</td>
+                <td>Mon rapport</td>
                 <td>
-                    <a href="{{ path('app_rapport_show', {'id': rapport.id}) }}">WIP Telecharger Rapport</a>
+                    <a href="/telecharger-rapport?id={{ rapport.upload.id }}">Telecharger Rapport</a>
 {#                    <a href="{{ path('app_rapport_edit', {'id': rapport.id}) }}">edit</a>#}
                 </td>
             </tr>

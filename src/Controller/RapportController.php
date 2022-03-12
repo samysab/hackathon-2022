@@ -6,16 +6,19 @@ use App\Entity\Rapport;
 use App\Entity\Upload;
 use App\Entity\User;
 use App\Form\UploadType;
+use App\Repository\UploadRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use phpDocumentor\Reflection\DocBlock\Tags\Throws;
 use phpDocumentor\Reflection\Types\This;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Form\RapportType;
 use App\Repository\RapportRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -65,8 +68,8 @@ class RapportController extends AbstractController
             $rapport = new Rapport();
             $rapport->setPrice(0);
 
-            $rapport->setUserId($user);
             $rapport->setUpload($upload);
+            $rapport->setUtilisateur($user);
 
             $entityManager->persist($rapport);
             $entityManager->flush();
@@ -74,9 +77,9 @@ class RapportController extends AbstractController
             $email = (new Email())
                 ->from('wbhackathon2022@example.com')
                 ->to("samy.sab92@gmail.com")
-                ->subject("[WB] Votre rapportOld d'étude est prêt !")
+                ->subject("[WB] Votre rapport d'étude est prêt !")
                 ->text('Sending emails is fun again!')
-                ->html("<h2>Votre rapportOld d'étude est enfin prêt !</h2><p>Nous vous avons créer un login et un mot de passe afin que vous puissiez acceder à votre espace client</p><p><u>Information de connexion :</u></p><p>Login : ".$user->getLogin()."</p><p>Email : ".$user->getEmail()."</p><p>Mot de passe : ".$password. "</p>");
+                ->html("<h2>Votre rapport d'étude est enfin prêt !</h2><p>Nous vous avons créer un login et un mot de passe afin que vous puissiez acceder à votre espace client</p><p><u>Information de connexion :</u></p><p>Login : ".$user->getLogin()."</p><p>Email : ".$user->getEmail()."</p><p>Mot de passe : ".$password. "</p>");
 
             $mailer->send($email);
 
@@ -170,4 +173,27 @@ class RapportController extends AbstractController
             'rapports' => $rapportRepository->findAll()
         ]);
     }
+
+    #[Route('/telecharger-rapport', name: 'app_dll_rapport', methods: ['GET'])]
+    public function dllRapport(RapportRepository $rapportRepository, UploadRepository $uploadRepository, EntityManagerInterface $entityManager, Request $request): Response
+    {
+        $id = $request->query->get('id');
+        $file = new Upload();
+        $file = $uploadRepository->findOneBy(['id' => $id]);
+        if (! $file) {
+            $array = array (
+                'status' => 0,
+                'message' => 'File does not exist'
+            );
+            $response = new JsonResponse ( $array, 200 );
+            return $response;
+        }
+        $fileName = $file->getName();
+        $file_with_path = "uploads/" . $fileName;
+        $response = new BinaryFileResponse ( $file_with_path );
+        $response->headers->set ( 'Content-Type', 'text/plain' );
+        $response->setContentDisposition ( ResponseHeaderBag::DISPOSITION_ATTACHMENT, "monRapport.pdf" );
+        return $response;
+    }
 }
+

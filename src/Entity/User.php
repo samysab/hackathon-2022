@@ -43,6 +43,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $login;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Rapport::class, mappedBy="utilisateur")
+     */
+    private $rapports;
+
+    public function __construct()
+    {
+        $this->rapports = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

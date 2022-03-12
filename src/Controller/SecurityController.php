@@ -83,7 +83,7 @@ class SecurityController extends AbstractController
 
         return $this->renderForm('security/generateLogin.html.twig', [
             'user' => $user,
-            'formInvitation' => $form,
+            'form' => $form,
         ]);
     }
 

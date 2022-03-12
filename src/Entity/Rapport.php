@@ -60,6 +60,11 @@ class Rapport
      */
     private $upload;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="rapports")
+     */
+    private $utilisateur;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -169,6 +174,18 @@ class Rapport
     public function setUpload(?Upload $upload): self
     {
         $this->upload = $upload;
+
+        return $this;
+    }
+
+    public function getUtilisateur(): ?User
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?User $utilisateur): self
+    {
+        $this->utilisateur = $utilisateur;
 
         return $this;
     }
