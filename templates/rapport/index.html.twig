@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des rapports{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row center ms-4">
+    <h1>Liste des rapports</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom du fichier</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for rapport in rapports %}
+            <tr>
+                <td>{{ rapport.id }}</td>
+                <td>Mon rapport</td>
+                <td>
+                    <a href="/telecharger-rapport?id={{ rapport.upload.id }}">Telecharger Rapport</a>
+{#                    <a href="{{ path('app_rapport_edit', {'id': rapport.id}) }}">edit</a>#}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="9">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+        </div>
+    </div>
+{% endblock %}
